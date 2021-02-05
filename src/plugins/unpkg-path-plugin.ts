@@ -1,4 +1,5 @@
 import * as esbuild from 'esbuild-wasm';
+import axios from 'axios';
 
 export const unpkgPathPlugin = () => {
   return {
@@ -6,7 +7,19 @@ export const unpkgPathPlugin = () => {
     setup(build: esbuild.PluginBuild) {
       build.onResolve({ filter: /.*/ }, async (args: any) => {
         console.log('onResolve', args);
-        return { path: args.path, namespace: 'a' };
+        if (args.path === 'index.js') {
+          return { path: args.path, namespace: 'a' };
+        }
+
+        if (args.path.includes('./') || args.path.includes('../')) {
+          return {
+            path: new URL(args.path, `https://unpkg.com${args.resolveDir}/`)
+              .href,
+            namespace: 'a',
+          };
+        }
+
+        return { path: `https://unpkg.com/${args.path}`, namespace: 'a' };
       });
 
       build.onLoad({ filter: /.*/ }, async (args: any) => {
@@ -16,9 +29,19 @@ export const unpkgPathPlugin = () => {
           return {
             loader: 'jsx',
             contents: `
-              import message from 'tiny-test-pkg';
+              import message from 'nested-test-pkg';
               console.log(message);
             `,
+          };
+        }
+        // Possible idea for module federation
+        const { data, request } = await axios.get(args.path);
+        const path = new URL('./', request.responseURL).pathname;
+        if (data) {
+          return {
+            loader: 'jsx',
+            contents: data,
+            resolveDir: path,
           };
         }
       });
