@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import * as esbuild from 'esbuild-wasm';
-import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
+import { unpkgPathPlugin, fetchPlugin } from './plugins';
 
 function App(): JSX.Element {
   const [input, setInput] = useState('');
@@ -28,7 +28,11 @@ function App(): JSX.Element {
       entryPoints: ['index.js'],
       bundle: true,
       write: false,
-      plugins: [unpkgPathPlugin()],
+      plugins: [unpkgPathPlugin(), fetchPlugin(input)],
+      define: {
+        'process.env.NODE_ENV': '"production"',
+        global: 'window',
+      },
     });
     setCode(converted.outputFiles[0].text);
   };
