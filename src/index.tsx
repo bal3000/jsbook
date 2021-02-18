@@ -5,13 +5,13 @@ import { unpkgPathPlugin, fetchPlugin } from './plugins';
 
 function App(): JSX.Element {
   const [input, setInput] = useState('');
-  const [code, setCode] = useState('');
   const serviceRef = useRef<esbuild.Service>();
+  const iframe = useRef<any>();
 
   const startService = async () => {
     serviceRef.current = await esbuild.startService({
       worker: true,
-      wasmURL: '/esbuild.wasm',
+      wasmURL: 'https://unpkg.com/esbuild-wasm@0.8.27/esbuild.wasm',
     });
   };
 
@@ -34,8 +34,25 @@ function App(): JSX.Element {
         global: 'window',
       },
     });
-    setCode(converted.outputFiles[0].text);
+    iframe.current.contentWindow.postMessage(
+      converted.outputFiles[0].text,
+      '*'
+    );
   };
+
+  const html = `
+    <html>
+      <head></head>
+      <body>
+        <div id="root"></div>
+        <script>
+          window.addEventListener('message', (event) => {
+            eval(event.data);
+          }, false);
+        </script>
+      </body>
+    </html>
+  `;
 
   return (
     <div>
@@ -46,7 +63,12 @@ function App(): JSX.Element {
       <div>
         <button onClick={onSetCode}>Submit</button>
       </div>
-      <pre>{code}</pre>
+      <iframe
+        ref={iframe}
+        title='code'
+        srcDoc={html}
+        sandbox='allow-scripts'
+      ></iframe>
     </div>
   );
 }

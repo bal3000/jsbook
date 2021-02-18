@@ -10,14 +10,14 @@ export const fetchPlugin = (inputCode: string) => {
   return {
     name: 'fetch-plugin',
     setup(build: esbuild.PluginBuild) {
-      build.onLoad({ filter: /.*/ }, async (args: any) => {
-        if (args.path === 'index.js') {
-          return {
-            loader: 'jsx',
-            contents: inputCode,
-          };
-        }
+      build.onLoad({ filter: /(^index\.js$)/ }, async () => {
+        return {
+          loader: 'jsx',
+          contents: inputCode,
+        };
+      });
 
+      build.onLoad({ filter: /.*/ }, async (args: any) => {
         // Check if have already fetched this file and its in cache
         const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
           args.path
@@ -27,24 +27,45 @@ export const fetchPlugin = (inputCode: string) => {
         if (cachedResult) {
           return cachedResult;
         }
+        return null;
+      });
 
+      build.onLoad({ filter: /.css$/ }, async (args: any) => {
         // Possible idea for module federation
         const { data, request } = await axios.get(args.path);
         const path = new URL('./', request.responseURL).pathname;
-        const fileType = args.path.match(/.css$/) ? 'css' : 'jsx';
-        const contents =
-          fileType === 'css'
-            ? `
+
+        const escaped = data
+          .replace(/\n/g, '')
+          .replace(/"/g, '\\"')
+          .replace(/'/g, "\\'");
+        const contents = `
             const style = document.createElement('style');
-            style.innerText = '${data}';
+            style.innerText = '${escaped}';
             document.head.appendChild(style);
-        `
-            : data;
+        `;
 
         if (data) {
           const result: esbuild.OnLoadResult = {
             loader: 'jsx',
-            contents: contents,
+            contents,
+            resolveDir: path,
+          };
+
+          await fileCache.setItem(args.path, result);
+          return result;
+        }
+      });
+
+      build.onLoad({ filter: /.*/ }, async (args: any) => {
+        // Possible idea for module federation
+        const { data, request } = await axios.get(args.path);
+        const path = new URL('./', request.responseURL).pathname;
+
+        if (data) {
+          const result: esbuild.OnLoadResult = {
+            loader: 'jsx',
+            contents: data,
             resolveDir: path,
           };
 
