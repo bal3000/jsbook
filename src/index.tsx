@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import * as esbuild from 'esbuild-wasm';
 import { unpkgPathPlugin, fetchPlugin } from './plugins';
+import CodeEditor from './components/code-editor';
 
 function App(): JSX.Element {
   const [input, setInput] = useState('');
@@ -23,6 +24,8 @@ function App(): JSX.Element {
     if (!serviceRef.current) {
       return;
     }
+
+    iframe.current.srcdoc = html;
 
     const converted = await serviceRef.current.build({
       entryPoints: ['index.js'],
@@ -47,7 +50,13 @@ function App(): JSX.Element {
         <div id="root"></div>
         <script>
           window.addEventListener('message', (event) => {
-            eval(event.data);
+            try {
+              eval(event.data);
+            } catch (err) {
+              const root = document.querySelector('#root');
+              root.innerHTML = '<div style="color: red;"><h4>Runtime Error</h4>' + err + '</div>';
+              console.error(err);
+            }
           }, false);
         </script>
       </body>
@@ -56,6 +65,7 @@ function App(): JSX.Element {
 
   return (
     <div>
+      <CodeEditor />
       <textarea
         value={input}
         onChange={({ target }) => setInput(target.value)}
