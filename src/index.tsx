@@ -65,7 +65,7 @@ function App(): JSX.Element {
 
   return (
     <div>
-      <CodeEditor />
+      <CodeEditor initialValue='' onCodeChange={(value) => setInput(value)} />
       <textarea
         value={input}
         onChange={({ target }) => setInput(target.value)}
