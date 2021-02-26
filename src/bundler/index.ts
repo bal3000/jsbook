@@ -3,7 +3,12 @@ import { unpkgPathPlugin, fetchPlugin } from './plugins';
 
 let service: esbuild.Service;
 
-async function bundler(rawCode: string): Promise<string> {
+interface BundledCode {
+  code: string;
+  err: string;
+}
+
+async function bundler(rawCode: string): Promise<BundledCode> {
   if (!service) {
     service = await esbuild.startService({
       worker: true,
@@ -11,18 +16,28 @@ async function bundler(rawCode: string): Promise<string> {
     });
   }
 
-  const result = await service.build({
-    entryPoints: ['index.js'],
-    bundle: true,
-    write: false,
-    plugins: [unpkgPathPlugin(), fetchPlugin(rawCode)],
-    define: {
-      'process.env.NODE_ENV': '"production"',
-      global: 'window',
-    },
-  });
+  try {
+    const result = await service.build({
+      entryPoints: ['index.js'],
+      bundle: true,
+      write: false,
+      plugins: [unpkgPathPlugin(), fetchPlugin(rawCode)],
+      define: {
+        'process.env.NODE_ENV': '"production"',
+        global: 'window',
+      },
+    });
 
-  return result.outputFiles[0].text;
+    return {
+      code: result.outputFiles[0].text,
+      err: '',
+    };
+  } catch (err) {
+    return {
+      code: '',
+      err: err.message,
+    };
+  }
 }
 
 export default bundler;

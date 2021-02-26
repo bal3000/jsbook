@@ -12,12 +12,14 @@ interface CodeCellProps {
 function CodeCell({ refreshRate }: CodeCellProps) {
   const [input, setInput] = useState('');
   const [code, setCode] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(
       async () => {
-        const converted = await bundler(input);
-        setCode(converted);
+        const bundle = await bundler(input);
+        setCode(bundle.code);
+        setError(bundle.err);
       },
       refreshRate ? refreshRate : 1000
     );
@@ -36,7 +38,7 @@ function CodeCell({ refreshRate }: CodeCellProps) {
             onCodeChange={(value) => setInput(value)}
           />
         </Resizable>
-        <Preview code={code} />
+        <Preview code={code} error={error} />
       </div>
     </Resizable>
   );

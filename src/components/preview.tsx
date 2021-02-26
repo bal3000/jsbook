@@ -4,6 +4,7 @@ import './preview.css';
 
 interface PreviewProps {
   code: string;
+  error: string;
 }
 
 const html = `
@@ -41,7 +42,7 @@ const html = `
     </html>
   `;
 
-function Preview({ code }: PreviewProps) {
+function Preview({ code, error }: PreviewProps) {
   const iframe = useRef<any>();
 
   useEffect(() => {
