@@ -60,6 +60,7 @@ function Preview({ code, error }: PreviewProps) {
         srcDoc={html}
         sandbox='allow-scripts'
       ></iframe>
+      {error && <div className='preview-error'>{error}</div>}
     </div>
   );
 }
