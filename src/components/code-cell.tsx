@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Resizable from './resizable';
 
 import bundler from '../bundler';
 import CodeEditor from './code-editor';
 import Preview from './preview';
 
-function CodeCell() {
+interface CodeCellProps {
+  refreshRate?: number;
+}
+
+function CodeCell({ refreshRate }: CodeCellProps) {
   const [input, setInput] = useState('');
   const [code, setCode] = useState('');
 
-  const onSetCode = async () => {
-    const converted = await bundler(input);
-    setCode(converted);
-  };
+  useEffect(() => {
+    const timer = setTimeout(
+      async () => {
+        const converted = await bundler(input);
+        setCode(converted);
+      },
+      refreshRate ? refreshRate : 1000
+    );
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [input, refreshRate]);
 
   return (
     <Resizable direction='vertical'>

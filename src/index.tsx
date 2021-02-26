@@ -6,7 +6,7 @@ import CodeCell from './components/code-cell';
 function App(): JSX.Element {
   return (
     <div>
-      <CodeCell />
+      <CodeCell refreshRate={1000} />
     </div>
   );
 }
