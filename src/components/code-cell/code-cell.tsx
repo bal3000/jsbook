@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import Resizable from './resizable';
+import Resizable from '../resizable/resizable';
 
-import bundler from '../bundler';
-import CodeEditor from './code-editor';
-import Preview from './preview';
+import bundler from '../../bundler';
+import CodeEditor from './code-editor/code-editor';
+import Preview from './preview/preview';
 
 interface CodeCellProps {
   refreshRate?: number;
