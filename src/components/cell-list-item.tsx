@@ -9,9 +9,9 @@ interface CellListItemProps {
 function CellListItem({ cell }: CellListItemProps) {
   let child: JSX.Element;
   if (cell.type === 'code') {
-    child = <CodeCell refreshRate={1000} />;
+    child = <CodeCell cell={cell} refreshRate={1000} />;
   } else {
-    child = <TextEditor />;
+    child = <TextEditor cell={cell} />;
   }
 
   return <div>{child}</div>;

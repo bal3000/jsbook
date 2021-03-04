@@ -4,20 +4,23 @@ import Resizable from '../resizable/resizable';
 import bundler from '../../bundler';
 import CodeEditor from './code-editor/code-editor';
 import Preview from './preview/preview';
+import { Cell } from '../../state';
+import { useActions } from '../../hooks';
 
 interface CodeCellProps {
+  cell: Cell;
   refreshRate?: number;
 }
 
-function CodeCell({ refreshRate }: CodeCellProps) {
-  const [input, setInput] = useState('');
+function CodeCell({ cell, refreshRate }: CodeCellProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const { updateCell } = useActions();
 
   useEffect(() => {
     const timer = setTimeout(
       async () => {
-        const bundle = await bundler(input);
+        const bundle = await bundler(cell.content);
         setCode(bundle.code);
         setError(bundle.err);
       },
@@ -27,15 +30,15 @@ function CodeCell({ refreshRate }: CodeCellProps) {
     return () => {
       clearTimeout(timer);
     };
-  }, [input, refreshRate]);
+  }, [cell.content, refreshRate]);
 
   return (
     <Resizable direction='vertical'>
       <div style={{ height: '100%', display: 'flex', flexDirection: 'row' }}>
         <Resizable direction='horizontal'>
           <CodeEditor
-            initialValue=''
-            onCodeChange={(value) => setInput(value)}
+            initialValue={cell.content}
+            onCodeChange={(value) => updateCell(cell.id, value)}
           />
         </Resizable>
         <Preview code={code} error={error} />
