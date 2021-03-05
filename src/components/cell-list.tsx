@@ -1,5 +1,5 @@
 import { useTypedSelector } from '../hooks';
-import CellListItem from './cell-list-item';
+import CellListItem from './cell-list-item/cell-list-item';
 
 function CellList() {
   const cells = useTypedSelector(({ cells: { order, data } }) =>

@@ -1,3 +1,5 @@
+import './action-bar.css';
+
 import { useActions } from '../../hooks';
 import ActionButton from './action-button/action-button';
 
@@ -9,7 +11,7 @@ function ActionBar({ id }: ActionBarProps) {
   const { moveCell, deleteCell } = useActions();
 
   return (
-    <div>
+    <div className='action-bar'>
       <ActionButton
         iconClass={'fa-arrow-up'}
         onButtonClick={() => moveCell(id, 'up')}
