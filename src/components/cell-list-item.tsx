@@ -1,6 +1,7 @@
 import { Cell } from '../state';
 import CodeCell from './code-cell/code-cell';
 import TextEditor from './text-editor/text-editor';
+import ActionBar from './action-bar/action-bar';
 
 interface CellListItemProps {
   cell: Cell;
@@ -14,7 +15,12 @@ function CellListItem({ cell }: CellListItemProps) {
     child = <TextEditor cell={cell} />;
   }
 
-  return <div>{child}</div>;
+  return (
+    <div>
+      <ActionBar id={cell.id} />
+      {child}
+    </div>
+  );
 }
 
 export default CellListItem;
