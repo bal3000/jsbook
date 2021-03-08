@@ -3,19 +3,19 @@ import './add-cell.css';
 import { useActions } from '../../hooks';
 
 interface AddCellProps {
-  nextCellId: string | null;
+  previousCellId: string | null;
   forceVisible?: boolean;
 }
 
-function AddCell({ nextCellId, forceVisible }: AddCellProps) {
-  const { insertCellBefore } = useActions();
+function AddCell({ previousCellId, forceVisible }: AddCellProps) {
+  const { insertCellAfter } = useActions();
 
   return (
     <div className={`add-cell ${forceVisible && 'force-visible'}`}>
       <div className='add-buttons'>
         <button
           className='button is-rounded is-primary is-small'
-          onClick={() => insertCellBefore(nextCellId, 'code')}
+          onClick={() => insertCellAfter(previousCellId, 'code')}
         >
           <span className='icon is-small'>
             <i className='fas fa-plus'></i>
@@ -24,7 +24,7 @@ function AddCell({ nextCellId, forceVisible }: AddCellProps) {
         </button>
         <button
           className='button is-rounded is-primary is-small'
-          onClick={() => insertCellBefore(nextCellId, 'text')}
+          onClick={() => insertCellAfter(previousCellId, 'text')}
         >
           <span className='icon is-small'>
             <i className='fas fa-plus'></i>
