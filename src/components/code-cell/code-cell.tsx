@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import Resizable from '../resizable/resizable';
+import { useEffect } from 'react';
 
-import bundler from '../../bundler';
+import Resizable from '../resizable/resizable';
 import CodeEditor from './code-editor/code-editor';
 import Preview from './preview/preview';
 import { Cell } from '../../state';
 import { useActions } from '../../hooks';
+import { useTypedSelector } from '../../hooks';
 
 interface CodeCellProps {
   cell: Cell;
@@ -13,16 +13,13 @@ interface CodeCellProps {
 }
 
 function CodeCell({ cell, refreshRate }: CodeCellProps) {
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const { updateCell } = useActions();
+  const { updateCell, createBundle } = useActions();
+  const bundle = useTypedSelector((state) => state.bundles[cell.id]);
 
   useEffect(() => {
     const timer = setTimeout(
       async () => {
-        const bundle = await bundler(cell.content);
-        setCode(bundle.code);
-        setError(bundle.err);
+        createBundle(cell.id, cell.content);
       },
       refreshRate ? refreshRate : 1000
     );
@@ -30,7 +27,7 @@ function CodeCell({ cell, refreshRate }: CodeCellProps) {
     return () => {
       clearTimeout(timer);
     };
-  }, [cell.content, refreshRate]);
+  }, [cell.id, cell.content, createBundle, refreshRate]);
 
   return (
     <Resizable direction='vertical'>
@@ -47,7 +44,7 @@ function CodeCell({ cell, refreshRate }: CodeCellProps) {
             onCodeChange={(value) => updateCell(cell.id, value)}
           />
         </Resizable>
-        <Preview code={code} error={error} />
+        {bundle && <Preview code={bundle.code} error={bundle.err} />}
       </div>
     </Resizable>
   );
