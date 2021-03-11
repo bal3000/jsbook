@@ -17,16 +17,32 @@ interface CodeCellProps {
 function CodeCell({ cell, refreshRate }: CodeCellProps) {
   const { updateCell, createBundle } = useActions();
   const bundle = useTypedSelector((state) => state.bundles[cell.id]);
+  const cumulativeCode = useTypedSelector((state) => {
+    const { data, order } = state.cells;
+    const orderedCells = order.map((id) => data[id]);
+    const orderedCode: string[] = [];
+
+    for (let c of orderedCells) {
+      if (c.type === 'code') {
+        orderedCode.push(c.content);
+      }
+      if (c.id === cell.id) {
+        break;
+      }
+    }
+
+    return orderedCode;
+  });
 
   useEffect(() => {
     if (!bundle) {
-      createBundle(cell.id, cell.content);
+      createBundle(cell.id, cumulativeCode.join('\n'));
       return;
     }
 
     const timer = setTimeout(
       async () => {
-        createBundle(cell.id, cell.content);
+        createBundle(cell.id, cumulativeCode.join('\n'));
       },
       refreshRate ? refreshRate : 1000
     );
@@ -35,7 +51,7 @@ function CodeCell({ cell, refreshRate }: CodeCellProps) {
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cell.id, cell.content, createBundle, refreshRate]);
+  }, [cell.id, cumulativeCode.join('\n'), createBundle, refreshRate]);
 
   return (
     <Resizable direction='vertical'>
