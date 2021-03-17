@@ -1,5 +1,13 @@
-export function serve(port: number, filename: string, dir: string) {
-  console.log('serving traffic on port', port);
-  console.log('saving/fetching cells from', filename);
-  console.log('that file is in dir', dir);
+import express from 'express';
+
+export function serve(
+  port: number,
+  filename: string,
+  dir: string
+): Promise<void> {
+  const app = express();
+
+  return new Promise<void>((resolve, reject) => {
+    app.listen(port, resolve).on('error', reject);
+  });
 }
